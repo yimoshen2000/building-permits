@@ -1,0 +1,202 @@
+---
+title: "Project 1: Data Exploration and Visualization"
+author: "Yimo Shen"
+date: "02/03/2022"
+output: html_document
+---
+### Introduction 
+
+This project aims to investigate the recent housing development trends in Seattle by using the data set "Building_Permits_Clean.csv", which contains data on building permits from Seattle from 2017 to 2021. It includes information such as permit classes, types, specific descriptions, estimated project costs, issued dates and issued locations etc. More specifically, this project will look for the effects of the COVID-19 pandemic by comparing data collected in 2017 to data collected in 2021. 
+
+### Findings
+```{r, echo = FALSE, message = FALSE}
+# attach tidyverse packages 
+library(tidyverse)
+# load data
+permits <- read.csv("https://raw.githubusercontent.com/svteichman/STAT302-WIN2022/main/files/projects/01_data-visualization/Building_Permits_Clean.csv")
+```
+
+```{r, echo = FALSE, message = FALSE}
+# number of permits by permit class mapped
+ggplot(data = permits, aes(x = PermitClassMapped)) + geom_bar() + theme_bw(base_size = 15) +
+  labs(title = "Number of Permits by Mapped Permit Class", x = "Permit Class Mapped", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14))
+# permit class distribution bar chart
+ggplot(data = permits, aes(x = PermitClass), fill = PermitClass) + geom_bar() + theme_bw(base_size = 10) +
+  labs(title = "Number of Permits by Permit Class", x = "Permit Class", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14))
+```
+
+Figure 1: This plot shows the distribution of number of permits issued for each mapped permit class.  
+Figure 2: This plot shows the distribution of number of permits issued for each permit class.
+
+We can take a closer look at the permits data by firstly examining what class of permits have been issued. The plots above show that an overwhelming majority of permits are residential permits. Specifically, single family and multifamily homes permits. This isn't a surprise as the demand for housing around not only Seattle, but also around any major city in the United States, should far exceed the demand for nonresidential buildings. 
+
+```{r, echo = FALSE, message = FALSE}
+# permit type distribution
+ggplot(data = permits, aes(x = PermitTypeMapped)) + geom_bar() + theme_bw(base_size = 15) +
+  labs(title = "Number of Permits by Permit Type", x = "Permit Type", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14))
+```
+
+Figure 3: This plot shows the distribution of number of permits issued for each permit type.
+
+We can then examine the permits data by looking at the distribution of permits by permit type. The plot above shows that an overwhelming majority of permits are building permits. This isn't a surprise since it certainly isn't a rare sight to see construction of new buildings in the Seattle area. We can stumble across a demolition site once in a while, but it's nowhere as common as new apartment complexes and houses being built. 
+
+
+```{r, echo = FALSE, message = FALSE}
+permits_residential_building <- permits %>% filter(PermitClassMapped == "Residential", PermitTypeMapped == "Building")
+ggplot(data = permits_residential_building, aes(x = IssuedYear)) + geom_bar() + theme_bw(base_size = 13) +
+  labs(title = "Number of Residential Building Permits by Issued Year", x = "Issued Year", y = "Number of Residential Permits") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Figure 4: This plot shows the number of permits issued by year from 2017 to 2021
+
+Since it's shown that an overwhelming majority of permits being issued are for building residential homes, we can narrow down the data to reflect the Seattle housing market more accurately. The plot above shows a decreasing trend in number of permits issued from 2017 to 2021. More specifically, 2017-2019 data is largely even, and there's a significant drop off from 2019 to 2020 and the trend continues from 2020 to 2021. This could suggest that the COVID-19 pandemic is a factor a slowdown in building construction, resulting in a shortage of homes available. 
+
+```{r, echo = FALSE, message = FALSE}
+# Number of residential permits by neighborhood district in 2017
+permits_residential_building_2017 <- permits_residential_building %>% filter(IssuedYear == 2017)
+ggplot(data = permits_residential_building_2017, aes(x = NeighborhoodDistrict)) + 
+  geom_bar() + theme_bw(base_size = 10) + 
+  labs(title = "Number of Residential Building Permits by Neighborhood District in 2017", 
+       x = "Neighborhood District", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13), 
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + ylim(0, 600)
+# Number of residential permits by neighborhood district in 2021
+permits_residential_building_2021 <- permits_residential_building %>% filter(IssuedYear == 2021)
+ggplot(data = permits_residential_building_2021, aes(x = NeighborhoodDistrict)) + 
+  geom_bar() + theme_bw(base_size = 10) + 
+  labs(title = "Number of Residential Building Permits by Neighborhood District in 2021", 
+       x = "Neighborhood District", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13), 
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + ylim(0, 600)
+```
+
+Figure 5: This plot shows the number of residential building permits by neighborhood district in 2017  
+Figure 6: This plot shows the number of residential building permits by neighborhood district in 2021
+
+We can dig deeper into the residential building permits data by looking at its distribution across neighborhoods. One significant observation is that number of residential building permits decreases across the board between 2017 and 2021 with the exception of the Northeast neighborhood where there weren't any permits issued in 2017. The plots above depict a more detailed picture of how the number of permits changed from 2017 to 2021. 
+
+```{r, echo = FALSE, message = FALSE}
+# Estimate Project Cost for Residential Building Permits By Neighborhood in 2017
+ggplot(data = permits_residential_building_2017, aes(x = NeighborhoodDistrict, y = EstProjectCost)) + geom_boxplot(fill = "grey") +
+  theme_bw(base_size = 10) + 
+  labs(title = "Estimate Project Cost for Residential Building Permits By Neighborhood in 2017", x = "", y = "") + 
+  theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
+  ylim(c(0, 50000))
+# Estimate Project Cost for Residential Building Permits By Neighborhood in 2021
+ggplot(data = permits_residential_building_2021, aes(x = NeighborhoodDistrict, y = EstProjectCost)) + geom_boxplot(fill = "grey") +
+  theme_bw(base_size = 10) + 
+  labs(title = "Estimate Project Cost for Residential Building Permits By Neighborhood in 2021", x = "", y = "") + 
+  theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
+  ylim(c(0, 50000))
+```
+
+Figure 7: This plot shows the distribution of estimated project cost for residential building permits across all neighborhood districts in 2017  
+Figure 8: This plot shows the distribution of estimated project cost for residential building permits across all neighborhood districts in 2021
+
+After examining the number of permits being issued, we can then look at the estimate project costs for building residential units across all neighborhoods in Seattle, and compare the 2017 price levels to the 2021 price levels. The two plots above excluded most outliers of the data set and they have shown that the majority of neighborhoods saw an increase in median estimated project costs for building residential units, with the exceptions of downtown and central districts. This finding aligns with logical assumptions where we can assume the demand for housing in downtown Seattle is pretty low compared to the suburban districts. An increase in estimated project costs is an expected result as the previous plots have shown a decreasing number of permits, thus creating a shortage of residential units. 
+
+
+```{r, echo = FALSE, message = FALSE}
+# distribution of estimated project cost for residential building permits in 2017
+ggplot(data = permits_residential_building_2017, aes(x = log(EstProjectCost))) + 
+  geom_histogram(binwidth = 0.75, color = "black", fill = "grey") +
+  theme_bw(base_size = 15) + 
+  labs(x = "log of Estimated Project Cost for Residential Buildings in 2017", y = "Count") + xlim(0, 20) + ylim(0, 1000)
+# distribution of estimated project cost for residential building permits in 2021
+ggplot(data = permits_residential_building_2021, aes(x = log(EstProjectCost))) + 
+  geom_histogram(binwidth = 0.75, color = "black", fill = "grey") +
+  theme_bw(base_size = 15) + 
+  labs(x = "log of Estimated Project Cost for Residential Buildings in 2021", y = "Count") + xlim(0, 20) + ylim(0, 1000)
+```
+
+Figure 9: This plot shows the log of distribution of estimated project cost for residential building permits in 2017  
+Figure 10: This plot shows the log of distribution of estimated project cost for residential building permits in 2021
+
+We can then examine the shift in estimated project costs between 2017 to 2021 for residential building permits. The histograms above show that the entire distribution had a slight shift to the right, suggesting that the median project cost increased from 2017 to 2021. This further reinforces findings depicted in figure 7 and 8. 
+
+### Conclusion
+
+This project aims to investigate the effects of the COVID-19 pandemic in the Seattle housing market. Our findings show that there was a significant drop off in number of residential unit building permits issued across all neighborhood districts in Seattle between 2019 and 2021, and the corresponding estimated project costs increased across the board. These findings provide a possible explanation for the effects of COVID-19 on building construction, as new homes weren't being built at a rate to meet housing demand.
+It also provides an explanation for the absurdity that is the Seattle housing market, where property prices have skyrocketed and people were waiting in lines to buy houses. 
+
+
+### Code Appendix
+```{r, eval = FALSE}
+## Downloading data
+# attach tidyverse packages 
+library(tidyverse)
+# load data
+permits <- read.csv("https://raw.githubusercontent.com/svteichman/STAT302-WIN2022/main/files/projects/01_data-visualization/Building_Permits_Clean.csv")
+
+# Figure 1 and 2
+# number of permits by permit class mapped
+ggplot(data = permits, aes(x = PermitClassMapped)) + geom_bar() + theme_bw(base_size = 15) +
+  labs(title = "Number of Permits by Permit Class Mapped", x = "Permit Class Mapped", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14))
+# permit class distribution bar chart
+ggplot(data = permits, aes(x = PermitClass)) + geom_bar() + theme_bw(base_size = 10) +
+  labs(title = "Number of Permits by Permit Class", x = "Permit Class", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14))
+
+## Figure 3 
+# permit type distribution
+ggplot(data = permits, aes(x = PermitTypeMapped)) + geom_bar() + theme_bw(base_size = 15) +
+  labs(title = "Number of Permits by Permit Type", x = "Permit Type", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14))
+
+## Figure 4 and 5
+# Number of residential permits by neighborhood district in 2017
+permits_residential_building_2017 <- permits_residential_building %>% filter(IssuedYear == 2017)
+ggplot(data = permits_residential_building_2017, aes(x = NeighborhoodDistrict)) + 
+  geom_bar() + theme_bw(base_size = 10) + 
+  labs(title = "Number of Residential Building Permits by Neighborhood District in 2017", 
+       x = "Neighborhood District", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13), 
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + ylim(0, 600)
+# Number of residential permits by neighborhood district in 2021
+permits_residential_building_2021 <- permits_residential_building %>% filter(IssuedYear == 2021)
+ggplot(data = permits_residential_building_2021, aes(x = NeighborhoodDistrict)) + 
+  geom_bar() + theme_bw(base_size = 10) + 
+  labs(title = "Number of Residential Building Permits by Neighborhood District in 2021", 
+       x = "Neighborhood District", y = "Number of Permits") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13), 
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + ylim(0, 600)
+
+## Figure 6 and 7
+# Estimate Project Cost for Residential Building Permits By Neighborhood in 2017
+ggplot(data = permits_residential_building_2017, aes(x = NeighborhoodDistrict, y = EstProjectCost)) + geom_boxplot(fill = "grey") +
+  theme_bw(base_size = 10) + 
+  labs(title = "Estimate Project Cost for Residential Building Permits By Neighborhood in 2017", x = "", y = "") + 
+  theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
+  ylim(c(0, 50000))
+# Estimate Project Cost for Residential Building Permits By Neighborhood in 2021
+ggplot(data = permits_residential_building_2021, aes(x = NeighborhoodDistrict, y = EstProjectCost)) + geom_boxplot(fill = "grey") +
+  theme_bw(base_size = 10) + 
+  labs(title = "Estimate Project Cost for Residential Building Permits By Neighborhood in 2021", x = "", y = "") + 
+  theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
+  ylim(c(0, 50000))
+
+## Figure 8 and 9
+# distribution of estimated project cost for residential building permits in 2017
+ggplot(data = permits_residential_building_2017, aes(x = log(EstProjectCost))) + 
+  geom_histogram(binwidth = 0.75, color = "black", fill = "grey") +
+  theme_bw(base_size = 15) + 
+  labs(x = "log of Estimated Project Cost for Residential Buildings in 2017", y = "Count") + xlim(0, 20) + ylim(0, 1000)
+# distribution of estimated project cost for residential building permits in 2021
+ggplot(data = permits_residential_building_2021, aes(x = log(EstProjectCost))) + 
+  geom_histogram(binwidth = 0.75, color = "black", fill = "grey") +
+  theme_bw(base_size = 15) + 
+  labs(x = "log of Estimated Project Cost for Residential Buildings in 2021", y = "Count") + xlim(0, 20) + ylim(0, 1000)
+```
+
+
+
+
+
+
+
+
